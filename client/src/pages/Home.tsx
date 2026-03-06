@@ -405,20 +405,11 @@ const Home: React.FC = () => {
         overflow="hidden"
         transition="all 0.2s ease"
         w="full"
-        maxW={{ base: '100%', md: '250px' }}
         h="full"
         display="flex"
         flexDirection="column"
-        mx="auto"
         _hover={{ boxShadow: 'md', transform: 'translateY(-2px)', cursor: 'pointer' }}
         onClick={() => navigate(getProductUrl(product))}
-        sx={{
-          '@media (max-width: 850px)': {
-            width: '100%',
-            minWidth: 0,
-            maxWidth: '100%',
-          },
-        }}
       >
         {/* Image section */}
         <Box position="relative" w="full" aspectRatio={1} overflow="hidden">
@@ -485,12 +476,11 @@ const Home: React.FC = () => {
 
         {/* Info section */}
         <Box
-          p={4}
+          p={{ base: 2, md: 4 }}
           display="flex"
           flexDirection="column"
           flex={1}
           overflow="hidden"
-          sx={{ '@media (max-width: 480px)': { padding: '4px' } }}
         >
           {/* Seller row (desktop) */}
           <Flex justify="space-between" align="center" mb={2} display={{ base: 'none', md: 'flex' }}>
@@ -668,19 +658,10 @@ const Home: React.FC = () => {
           '2xl': 'repeat(5, 1fr)',
         }}
         gap={{ base: 2, md: 4, lg: 4, xl: 5 }}
-        alignItems="start"
-        justifyContent="center"
-        mx="auto"
-        sx={{
-          '@media (max-width: 850px)': {
-            gridTemplateColumns: '1fr 1fr !important',
-            gap: '10px',
-          },
-        }}
       >
         {itemsWithAds.map((item, displayIndex) =>
           item.type === 'product' ? (
-            <Box key={`product-${item.data.id}`} sx={{ '@media (max-width: 850px)': { minWidth: 0, maxWidth: 'none' } }}>
+            <Box key={`product-${item.data.id}`} display="flex" flexDirection="column">
               {renderProductCard(item.data)}
             </Box>
           ) : (
@@ -712,7 +693,7 @@ const Home: React.FC = () => {
           mx={{ base: 'auto', lg: 0 }}
         >
           {/* Main Search Bar */}
-          <HStack w="full" spacing={3} wrap="wrap" ml={{ base: 0, md: -14 }}>
+          <HStack w="full" spacing={3} wrap="wrap">
             <InputGroup size="lg" flex={1} minW={{ base: 0, md: 'auto' }}>
               <InputLeftElement pointerEvents="none">
                 <SearchIcon color="gray.400" />
@@ -1232,11 +1213,8 @@ const Home: React.FC = () => {
           <Box
             w="full"
             mx="auto"
-            px={{ base: 2, md: 4, lg: 0 }}
             pb={{ base: 20, md: 0 }}
             minH={{ base: '1200px', md: '1600px' }}
-            ml={-10}
-            sx={{ '@media (max-width: 850px)': { paddingLeft: '12px', paddingRight: '12px', marginLeft: 0 } }}
           >
             <ProductGridWithAds products={products} user={user} />
 
