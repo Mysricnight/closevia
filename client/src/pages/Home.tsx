@@ -658,11 +658,10 @@ const Home: React.FC = () => {
           '2xl': 'repeat(5, 1fr)',
         }}
         gap={{ base: 2, md: 4, lg: 4, xl: 5 }}
-        alignItems="start"
       >
         {itemsWithAds.map((item, displayIndex) =>
           item.type === 'product' ? (
-            <Box key={`product-${item.data.id}`}>
+            <Box key={`product-${item.data.id}`} display="flex" flexDirection="column">
               {renderProductCard(item.data)}
             </Box>
           ) : (
