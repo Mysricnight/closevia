@@ -9,6 +9,7 @@ import {
 import { FiMonitor, FiPlus, FiEdit2, FiTrash2, FiRefreshCw, FiImage, FiVideo } from 'react-icons/fi'
 import { api } from '../services/api'
 import { getImageUrl } from '../utils/imageUtils'
+import { showDebouncedToast } from '../utils/toastUtils'
 
 interface Advertisement {
   id: number
@@ -44,7 +45,7 @@ const AdvertisementCMS = () => {
         setAds(response.data.data || [])
       }
     } catch (err) {
-      toast({ title: 'Failed to fetch ads', status: 'error' })
+      showDebouncedToast(toast, { id: 'ads-fetch-error', title: 'Failed to fetch ads', status: 'error', position: 'top-right' })
     } finally {
       setLoading(false)
     }
@@ -60,10 +61,10 @@ const AdvertisementCMS = () => {
       formData.append('title', ad.title)
       formData.append('is_active', (!ad.is_active).toString())
       await api.put(`/api/admin/advertisements/${ad.id}`, formData)
-      toast({ title: 'Status updated', status: 'success' })
+      showDebouncedToast(toast, { id: 'ads-status-update', title: 'Status updated', status: 'success', position: 'top-right' })
       fetchAds()
     } catch (err) {
-      toast({ title: 'Failed to update status', status: 'error' })
+      showDebouncedToast(toast, { id: 'ads-status-update-error', title: 'Failed to update status', status: 'error', position: 'top-right' })
     }
   }
 
@@ -71,10 +72,10 @@ const AdvertisementCMS = () => {
     if (!window.confirm('Are you sure you want to delete this ad?')) return
     try {
       await api.delete(`/api/admin/advertisements/${id}`)
-      toast({ title: 'Ad deleted', status: 'success' })
+      showDebouncedToast(toast, { id: 'ads-deleted', title: 'Ad deleted', status: 'success', position: 'top-right' })
       fetchAds()
     } catch (err) {
-      toast({ title: 'Failed to delete ad', status: 'error' })
+      showDebouncedToast(toast, { id: 'ads-delete-error', title: 'Failed to delete ad', status: 'error', position: 'top-right' })
     }
   }
 
@@ -97,24 +98,24 @@ const AdvertisementCMS = () => {
       if (mediaFile) {
         formData.append('media', mediaFile)
       } else if (!editingAd?.id) {
-        toast({ title: 'Media file is required for new ads', status: 'error' })
+        showDebouncedToast(toast, { id: 'ads-no-media', title: 'Media file is required for new ads', status: 'error', position: 'top-right' })
         setSubmitting(false)
         return
       }
 
       if (editingAd?.id) {
         await api.put(`/api/admin/advertisements/${editingAd.id}`, formData)
-        toast({ title: 'Ad updated', status: 'success' })
+        showDebouncedToast(toast, { id: `ads-updated-${editingAd.id}`, title: 'Ad updated', status: 'success', position: 'top-right' })
       } else {
         await api.post('/api/admin/advertisements', formData)
-        toast({ title: 'Ad created', status: 'success' })
+        showDebouncedToast(toast, { id: 'ads-created', title: 'Ad created', status: 'success', position: 'top-right' })
       }
       
       onClose()
       fetchAds()
       setMediaFile(null)
     } catch (err: any) {
-      toast({ title: 'Submission failed', description: err?.response?.data?.error || err.message, status: 'error' })
+      showDebouncedToast(toast, { id: 'ads-submit-error', title: 'Submission failed', description: err?.response?.data?.error || err.message, status: 'error', position: 'top-right' })
     } finally {
       setSubmitting(false)
     }

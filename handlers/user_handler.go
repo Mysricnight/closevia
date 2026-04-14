@@ -635,7 +635,22 @@ func (h *UserHandler) Login(c *fiber.Ctx) error {
 	// 	})
 	// }
 
-	// Check for strikes suspension ladder
+	// Check if user is suspended or banned by admin
+	if user.Role == "suspended" {
+		return c.Status(403).JSON(models.APIResponse{
+			Success: false,
+			Error:   "Your account has been suspended. Please contact support for more information.",
+		})
+	}
+
+	if user.Role == "banned" {
+		return c.Status(403).JSON(models.APIResponse{
+			Success: false,
+			Error:   "Your account has been permanently banned and cannot log in.",
+		})
+	}
+
+	// Check for strikes suspension ladder (legacy check)
 	if user.IsSuspended || user.Strikes >= 3 {
 		return c.Status(403).JSON(models.APIResponse{
 			Success: false,
@@ -775,7 +790,22 @@ func (h *UserHandler) GoogleLogin(c *fiber.Ctx) error {
 		})
 	}
 
-	// Check if user is suspended or has 3+ strikes
+	// Check if user is suspended or banned by admin
+	if user.Role == "suspended" {
+		return c.Status(403).JSON(models.APIResponse{
+			Success: false,
+			Error:   "Your account has been suspended. Please contact support for more information.",
+		})
+	}
+
+	if user.Role == "banned" {
+		return c.Status(403).JSON(models.APIResponse{
+			Success: false,
+			Error:   "Your account has been permanently banned and cannot log in.",
+		})
+	}
+
+	// Check if user is suspended or has 3+ strikes (legacy check)
 	if user.IsSuspended || user.Strikes >= 3 {
 		return c.Status(403).JSON(models.APIResponse{
 			Success: false,
