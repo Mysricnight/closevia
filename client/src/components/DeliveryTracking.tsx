@@ -41,6 +41,7 @@ import {
 import { api } from '../services/api'
 import { Delivery, DeliveryStatus } from '../types'
 import { formatPHP } from '../utils/currency'
+import { showDebouncedToast } from '../utils/toastUtils'
 
 interface DeliveryTrackingProps {
   isOpen: boolean
@@ -86,11 +87,12 @@ const DeliveryTracking: React.FC<DeliveryTrackingProps> = ({ isOpen, onClose, de
       }
     } catch (err: any) {
       setError(err?.response?.data?.error || 'Failed to fetch delivery')
-      toast({
-        id: "deliverytracking-error",
+      showDebouncedToast(toast, {
+        id: "delivery-tracking-error",
         title: 'Error',
         description: 'Failed to load delivery information',
         status: 'error',
+        position: 'top-right',
       })
     } finally {
       setLoading(false)

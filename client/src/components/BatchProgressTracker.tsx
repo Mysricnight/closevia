@@ -18,6 +18,7 @@ import {
 } from '@chakra-ui/react'
 import { CheckIcon, WarningIcon } from '@chakra-ui/icons'
 import { BatchDelivery, Delivery } from '../types'
+import { showDebouncedToast } from '../utils/toastUtils'
 
 interface BatchProgressTrackerProps {
   batch: BatchDelivery
@@ -59,26 +60,32 @@ export const BatchProgressTracker: React.FC<BatchProgressTrackerProps> = ({
 
       if (currentStopIndex < totalStops - 1) {
         setCurrentStopIndex(currentStopIndex + 1)
-        toast({
+        showDebouncedToast(toast, {
+          id: 'batch-stop-completed',
           title: 'Stop completed!',
           description: `Moving to stop ${currentStopIndex + 2} of ${totalStops}`,
           status: 'success',
           duration: 3000,
+          position: 'top-right',
         })
       } else {
-        toast({
+        showDebouncedToast(toast, {
+          id: 'batch-all-completed',
           title: 'Batch completed!',
           description: 'All deliveries have been completed',
           status: 'success',
           duration: 5000,
+          position: 'top-right',
         })
       }
     } catch (error) {
-      toast({
+      showDebouncedToast(toast, {
+        id: 'batch-update-error',
         title: 'Error updating stop',
         description: error instanceof Error ? error.message : 'Unknown error',
         status: 'error',
         duration: 5000,
+        position: 'top-right',
       })
     } finally {
       setIsUpdating(false)

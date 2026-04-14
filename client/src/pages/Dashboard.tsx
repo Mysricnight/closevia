@@ -67,6 +67,7 @@ import { FaCrown, FaHandshake, FaTimes, FaCheckCircle, FaClock, FaHistory, FaSho
 import { FiShoppingBag, FiRefreshCw, FiMessageCircle, FiGrid, FiList, FiSend, FiInbox, FiArchive, FiSliders } from 'react-icons/fi'
 import { formatPHP } from '../utils/currency'
 import { getFirstImage } from '../utils/imageUtils'
+import { showDebouncedToast } from '../utils/toastUtils'
 import { PRODUCT_CATEGORIES } from '../utils/categories'
 import VerifiedAvatar from '../components/VerifiedAvatar'
 import OfferDetailsModal from '../components/OfferDetailsModal'
@@ -204,7 +205,14 @@ const Dashboard: React.FC = () => {
   const [isProcessing, setIsProcessing] = useState(false)
   const [processModalOpen, setProcessModalOpen] = useState(false)
   const [productTitles, setProductTitles] = useState<Map<number, string>>(new Map())
+  
+  // Loading states for button protection against spam clicks
+  const [acceptingTrade, setAcceptingTrade] = useState(false)
+  const [decliningTrade, setDecliningTrade] = useState(false)
+  const [findingTrades, setFindingTrades] = useState(false)
+  
   const productImageCache = useRef<Map<number, string | null>>(new Map())
+  const lastTradeActionTime = useRef(0)
   const notificationCountsTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
   const multiwayAlertTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const multiwayAlertCountRef = useRef(0)
@@ -980,15 +988,18 @@ const Dashboard: React.FC = () => {
     const prevIds = prevMultiWayLoopIds.current
     
     let newCount = 0
+    const newLoopIds: string[] = []
     for (const id of visibleIds) {
       if (!prevIds.has(id)) {
         newCount++
+        newLoopIds.push(id)
       }
     }
     
+    // Show a single aggregated toast instead of multiple individual ones
     if (newCount > 0) {
-      toast({
-        id: 'new-loops-batch',
+      showDebouncedToast(toast, {
+        id: `new-loops-batch-${Date.now()}`,
         title: newCount > 1 ? 'Loops Found!' : 'New Trade Loop Found!',
         description: newCount > 1
           ? `You have ${newCount} new multi-way trade options available. Check below to review them.`
@@ -996,6 +1007,7 @@ const Dashboard: React.FC = () => {
         status: 'info',
         duration: 6000,
         isClosable: true,
+        position: 'top-right',
       })
     }
     
@@ -1507,7 +1519,11 @@ const Dashboard: React.FC = () => {
   }, [])
 
   const handleAcceptTrade = useCallback(async (trade: Trade) => {
+    // Prevent double-clicks/spam
+    if (acceptingTrade) return
+    
     try {
+      setAcceptingTrade(true)
       // Accept the offer, then open Trade Details for both parties
       await updateTrade(trade.id, { action: 'accept' })
 
@@ -1524,8 +1540,10 @@ const Dashboard: React.FC = () => {
       setViewTradeModalOpen(true)
     } catch {
       // updateTrade already toasts on error
+    } finally {
+      setAcceptingTrade(false)
     }
-  }, [updateTrade])
+  }, [updateTrade, acceptingTrade])
 
   const receivedOffers = useMemo(() => {
     const active = (incoming || []).filter(t => t.status === 'pending' || t.status === 'pending_multiway') // Include multiway matches
@@ -1814,8 +1832,12 @@ const Dashboard: React.FC = () => {
   const [isFindTradesOpen, setIsFindTradesOpen] = useState(false)
 
   const handleFindTradesClick = (product: Product) => {
+    if (findingTrades) return // Prevent double-clicks
+    setFindingTrades(true)
     setFindTradesProduct(product)
     setIsFindTradesOpen(true)
+    // Reset after modal is opened
+    setTimeout(() => setFindingTrades(false), 100)
   }
 
   const [isTradeModalOpen, setTradeModalOpen] = useState(false)
@@ -1827,6 +1849,7 @@ const Dashboard: React.FC = () => {
   }
 
   const handleBoostProductClick = async (product: Product) => {
+    if (boosting) return // Prevent double-clicks
     try {
       setBoosting(true)
       showPopup({
@@ -1863,6 +1886,8 @@ const Dashboard: React.FC = () => {
         icon: FaTimes,
         confirmColorScheme: 'red'
       })
+    } finally {
+      setBoosting(false)
     }
   }
 
@@ -2193,6 +2218,8 @@ const Dashboard: React.FC = () => {
                     e.stopPropagation()
                     handleBoostProductClick(product)
                   }}
+                  isDisabled={boosting}
+                  isLoading={boosting}
                   fontWeight="bold"
                   boxShadow="md"
                   _hover={{ transform: 'scale(1.05)', boxShadow: 'lg' }}
@@ -2305,6 +2332,7 @@ const Dashboard: React.FC = () => {
                     variant="outline"
                     leftIcon={<Icon as={FaRegLightbulb} boxSize={3} />}
                     onClick={() => handleFindTradesClick(product)}
+                    isDisabled={findingTrades}
                     fontSize="sm"
                     flex={1}
                     whiteSpace="nowrap"

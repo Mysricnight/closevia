@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { useToast } from '@chakra-ui/react'
 import { api } from '../services/api'
+import { showDebouncedToast } from '../utils/toastUtils'
 
 export interface TradeLoopNotification {
   id: string
@@ -19,11 +20,14 @@ export interface TradeLoopNotification {
 export const useTradeLoopNotifications = () => {
   const [notifications, setNotifications] = useState<TradeLoopNotification[]>([])
   const [isListening, setIsListening] = useState(false)
+  const [toastedLoopIds, setToastedLoopIds] = useState<Set<string>>(new Set())
   const toast = useToast()
 
   // Subscribe to trade loop notifications via SSE or polling
   const notificationsRef = useRef<TradeLoopNotification[]>([])
+  const toastedLoopIdsRef = useRef<Set<string>>(new Set())
   notificationsRef.current = notifications
+  toastedLoopIdsRef.current = toastedLoopIds
 
   useEffect(() => {
     let pollInterval: ReturnType<typeof setInterval> | null = null
@@ -46,17 +50,23 @@ export const useTradeLoopNotifications = () => {
               !n.read
           )
 
-          // Show toast for new trade loop notifications
+          // Show toast for new trade loop notifications with deduplication
           newNotifications.forEach((notif) => {
-            toast({
-        id: "usetradeloopnotifications-multi-way-trade-detected",
-              title: '🔗 Multi-Way Trade Detected!',
-              description: notif.message,
-              status: 'success',
-              duration: 8000,
-              isClosable: true,
-              position: 'top-right',
-            })
+            // Only show toast if we haven't already toasted this loop
+            if (!toastedLoopIdsRef.current.has(notif.loop_id)) {
+              showDebouncedToast(toast, {
+                id: `trade-loop-toast-${notif.loop_id}`,
+                title: '🔗 Multi-Way Trade Detected!',
+                description: notif.message,
+                status: 'success',
+                duration: 8000,
+                isClosable: true,
+                position: 'top-right',
+              })
+              // Mark this loop as toasted
+              toastedLoopIdsRef.current.add(notif.loop_id)
+              setToastedLoopIds(new Set(toastedLoopIdsRef.current))
+            }
           })
 
           setNotifications(data)

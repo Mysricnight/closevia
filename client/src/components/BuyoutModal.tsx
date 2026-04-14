@@ -7,6 +7,7 @@ import { api } from '../services/api'
 import { Product, TradeCreate, TradeOption } from '../types'
 import { getFirstImage } from '../utils/imageUtils'
 import { reverseGeocodeToAddress, formatCoordinates } from '../utils/locationUtils'
+import { showDebouncedToast } from '../utils/toastUtils'
 
 interface BuyoutModalProps {
   isOpen: boolean
@@ -122,32 +123,48 @@ const BuyoutModal: React.FC<BuyoutModalProps> = ({ isOpen, onClose, targetProduc
     if (!targetProductId) return
     
     if (!cashAmount || Number(cashAmount) <= 0) {
-      toast({
-        id: "buyoutmodal-invalid-amount", title: 'Invalid amount', description: 'Please enter a valid cash amount to offer.', status: 'warning' })
+      showDebouncedToast(toast, {
+        id: "buyout-invalid-amount",
+        title: 'Invalid amount',
+        description: 'Please enter a valid cash amount to offer.',
+        status: 'warning',
+        position: 'top-right',
+      })
       return
     }
     
     if (!tradeOption) {
-      toast({
-        id: "buyoutmodal-select-fulfillment-option", title: 'Select fulfillment option', description: 'Please select Meetup or Delivery option.', status: 'warning' })
+      showDebouncedToast(toast, {
+        id: "buyout-select-fulfillment",
+        title: 'Select fulfillment option',
+        description: 'Please select Meetup or Delivery option.',
+        status: 'warning',
+        position: 'top-right',
+      })
       return
     }
 
     if (tradeOption === 'delivery' && !resolvedDeliveryAddress()) {
-      toast({
-        id: "buyoutmodal-delivery-location-required", title: 'Delivery location required', description: 'Please detect your current location before sending a delivery buyout.', status: 'warning' })
+      showDebouncedToast(toast, {
+        id: "buyout-delivery-location-required",
+        title: 'Delivery location required',
+        description: 'Please detect your current location before sending a delivery buyout.',
+        status: 'warning',
+        position: 'top-right',
+      })
       return
     }
     
     // Layer 2 validation: Check for pending offer before submission
     if (hasPendingOfferOnTarget) {
-      toast({
-        id: "buyoutmodal-pending-offer-already-exists", 
-        title: 'Pending Offer Already Exists', 
-        description: 'You already have a pending offer on this product. Please wait for the trader to respond before sending another one.', 
+      showDebouncedToast(toast, {
+        id: "buyout-pending-offer-exists",
+        title: 'Pending Offer Already Exists',
+        description: 'You already have a pending offer on this product. Please wait for the trader to respond before sending another one.',
         status: 'warning',
         duration: 4000,
-        isClosable: true 
+        isClosable: true,
+        position: 'top-right',
       })
       return
     }
@@ -180,8 +197,13 @@ const BuyoutModal: React.FC<BuyoutModalProps> = ({ isOpen, onClose, targetProduc
       onClose()
     } catch (e: any) {
       const errorMessage = e?.response?.data?.error || 'Failed to send buyout offer'
-      toast({
-        id: "buyoutmodal-failed", title: 'Failed', description: errorMessage, status: 'error' })
+      showDebouncedToast(toast, {
+        id: "buyout-submit-failed",
+        title: 'Failed',
+        description: errorMessage,
+        status: 'error',
+        position: 'top-right',
+      })
     } finally {
       setSubmittingTrade(false)
     }
@@ -189,8 +211,13 @@ const BuyoutModal: React.FC<BuyoutModalProps> = ({ isOpen, onClose, targetProduc
 
   const handleDetectLocation = async () => {
     if (!navigator.geolocation) {
-      toast({
-        id: "buyoutmodal-geolocation-not-supported", title: 'Geolocation not supported', status: 'error', duration: 3000 })
+      showDebouncedToast(toast, {
+        id: "buyout-geolocation-not-supported",
+        title: 'Geolocation not supported',
+        status: 'error',
+        duration: 3000,
+        position: 'top-right',
+      })
       return
     }
 
@@ -209,18 +236,35 @@ const BuyoutModal: React.FC<BuyoutModalProps> = ({ isOpen, onClose, targetProduc
         try {
           await api.put('/api/users/profile', { latitude, longitude })
           if (refreshUser) await refreshUser()
-          toast({
-            id: "buyoutmodal-location-saved", title: 'Location saved!', description: address, status: 'success', duration: 3000 })
+          showDebouncedToast(toast, {
+            id: "buyout-location-saved",
+            title: 'Location saved!',
+            description: address,
+            status: 'success',
+            duration: 3000,
+            position: 'top-right',
+          })
         } catch {
-          toast({
-            id: "buyoutmodal-failed-to-save-location", title: 'Detected location only for this offer', description: address, status: 'warning', duration: 3500 })
+          showDebouncedToast(toast, {
+            id: "buyout-location-detected-only",
+            title: 'Detected location only for this offer',
+            description: address,
+            status: 'warning',
+            duration: 3500,
+            position: 'top-right',
+          })
         }
 
         setDetectingLocation(false)
       },
       () => {
-        toast({
-          id: "buyoutmodal-location-access-denied", title: 'Location access denied', status: 'warning', duration: 4000 })
+        showDebouncedToast(toast, {
+          id: "buyout-location-access-denied",
+          title: 'Location access denied',
+          status: 'warning',
+          duration: 4000,
+          position: 'top-right',
+        })
         setDetectingLocation(false)
       },
       { enableHighAccuracy: true, timeout: 10000 }

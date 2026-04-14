@@ -53,6 +53,7 @@ const TradeLoopNotificationsPanel: React.FC<TradeLoopNotificationsPanelProps> = 
         mb={6}
         position="relative"
         overflow="hidden"
+        boxShadow={{ base: 'md', md: 'lg' }}
       >
         {/* Accent bar */}
         <Box
@@ -64,21 +65,27 @@ const TradeLoopNotificationsPanel: React.FC<TradeLoopNotificationsPanelProps> = 
           bg="linear-gradient(90deg, #48bb78, #38a169)"
         />
 
-        <CardBody pt={6}>
-          <HStack justify="space-between" align="start" mb={4}>
-            <HStack spacing={3}>
-              <Icon as={FaLink} fontSize="xl" color="green.500" />
-              <VStack align="start" spacing={0}>
-                <Heading size="sm">
+        <CardBody pt={6} px={{ base: 3, md: 6 }} py={{ base: 4, md: 6 }}>
+          <HStack 
+            justify="space-between" 
+            align="start" 
+            mb={4}
+            flexWrap={{ base: 'wrap', md: 'nowrap' }}
+            spacing={{ base: 1, md: 3 }}
+          >
+            <HStack spacing={3} flex={1} minW={0}>
+              <Icon as={FaLink} fontSize={{ base: 'lg', md: 'xl' }} color="green.500" flexShrink={0} />
+              <VStack align="start" spacing={0} minW={0}>
+                <Heading size={{ base: 'sm', md: 'sm' }} noOfLines={1}>
                   Multi-Way Trade Opportunities
                 </Heading>
-                <Text fontSize="xs" color="gray.600">
+                <Text fontSize={{ base: 'xs', md: 'xs' }} color="gray.600" noOfLines={1}>
                   {unreadCount} new {unreadCount === 1 ? 'notification' : 'notifications'}
                 </Text>
               </VStack>
             </HStack>
             {unreadCount > 0 && (
-              <Badge colorScheme="green" fontSize="sm">
+              <Badge colorScheme="green" fontSize={{ base: 'xs', md: 'sm' }} flexShrink={0}>
                 {unreadCount} NEW
               </Badge>
             )}
@@ -86,8 +93,13 @@ const TradeLoopNotificationsPanel: React.FC<TradeLoopNotificationsPanelProps> = 
 
           <Divider mb={3} />
 
-          {/* Notifications list */}
-          <VStack spacing={2} align="stretch" maxH="300px" overflowY="auto">
+          {/* Notifications list - responsive max height */}
+          <VStack 
+            spacing={2} 
+            align="stretch" 
+            maxH={{ base: '250px', sm: '300px', md: '350px' }} 
+            overflowY="auto"
+          >
             {notifications.map((notif) => (
               <ScaleFade key={notif.id} in={true}>
                 <Box
@@ -95,26 +107,28 @@ const TradeLoopNotificationsPanel: React.FC<TradeLoopNotificationsPanelProps> = 
                   borderColor={!notif.read ? unreadBorder : 'transparent'}
                   borderWidth={!notif.read ? '1px' : '0px'}
                   borderRadius="md"
-                  p={3}
+                  p={{ base: 2, md: 3 }}
                   transition="all 0.2s"
                   _hover={{ shadow: 'sm' }}
                 >
                   <HStack justify="space-between" align="start" spacing={2}>
-                    <VStack align="start" spacing={1} flex={1}>
-                      <HStack spacing={2}>
-                        <Icon as={FaBell} fontSize="sm" color="green.500" />
+                    <VStack align="start" spacing={1} flex={1} minW={0}>
+                      <HStack spacing={2} minW={0}>
+                        <Icon as={FaBell} fontSize={{ base: 'xs', md: 'sm' }} color="green.500" flexShrink={0} />
                         <Text
-                          fontSize="sm"
+                          fontSize={{ base: 'xs', md: 'sm' }}
                           fontWeight={!notif.read ? 'semibold' : 'normal'}
+                          noOfLines={2}
+                          wordBreak="break-word"
                         >
                           {notif.message}
                         </Text>
                       </HStack>
-                      <HStack spacing={2} ml={6} fontSize="xs" color="gray.600">
-                        <Badge fontSize="xs" colorScheme="purple">
+                      <HStack spacing={2} ml={6} fontSize="xs" color="gray.600" flexWrap="wrap">
+                        <Badge fontSize={{ base: '10px', md: 'xs' }} colorScheme="purple" flexShrink={0}>
                           {notif.participant_count} participants
                         </Badge>
-                        <Text>
+                        <Text fontSize={{ base: '10px', md: 'xs' }} noOfLines={1}>
                           {new Date(notif.created_at).toLocaleString()}
                         </Text>
                       </HStack>
@@ -125,6 +139,7 @@ const TradeLoopNotificationsPanel: React.FC<TradeLoopNotificationsPanelProps> = 
                         variant="ghost"
                         onClick={() => markAsRead(notif.id)}
                         _hover={{ bg: 'transparent', opacity: 0.7 }}
+                        flexShrink={0}
                       >
                         <Icon as={FaTimes} />
                       </Button>
@@ -135,22 +150,31 @@ const TradeLoopNotificationsPanel: React.FC<TradeLoopNotificationsPanelProps> = 
             ))}
           </VStack>
 
-          {/* Action buttons */}
-          <HStack mt={4} spacing={2} justify="space-between">
+          {/* Action buttons - responsive layout */}
+          <HStack 
+            mt={4} 
+            spacing={2} 
+            justify={{ base: 'center', md: 'space-between' }}
+            flexWrap="wrap"
+          >
             <Button
-              size="sm"
+              size={{ base: 'xs', md: 'sm' }}
               variant="ghost"
               onClick={clearNotifications}
-              fontSize="xs"
+              fontSize={{ base: 'xs', md: 'sm' }}
+              flex={{ base: '1 1 auto', md: 'initial' }}
+              minW="fit-content"
             >
               Clear All
             </Button>
             <Button
-              size="sm"
+              size={{ base: 'xs', md: 'sm' }}
               colorScheme="green"
               onClick={onViewTrades}
               leftIcon={<FaLink />}
-              fontSize="xs"
+              fontSize={{ base: 'xs', md: 'sm' }}
+              flex={{ base: '1 1 auto', md: 'initial' }}
+              minW="fit-content"
             >
               View Trade Chains
             </Button>

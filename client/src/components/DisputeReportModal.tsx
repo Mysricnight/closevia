@@ -25,6 +25,7 @@ import {
 } from '@chakra-ui/react'
 import { api } from '../services/api'
 import { useNotification } from '../contexts/NotificationContext'
+import { showDebouncedToast } from '../utils/toastUtils'
 
 interface DisputeReportModalProps {
   isOpen: boolean
@@ -78,29 +79,33 @@ const DisputeReportModal: React.FC<DisputeReportModalProps> = ({
   const handleSubmitDispute = async () => {
     // Validation
     if (!tradeId) {
-      toast({ title: 'Error', description: 'Trade ID is missing', status: 'error' })
+      showDebouncedToast(toast, { id: 'dispute-missing-trade', title: 'Error', description: 'Trade ID is missing', status: 'error', position: 'top-right' })
       return
     }
 
     if (!category) {
-      toast({ title: 'Error', description: 'Please select a dispute category', status: 'error' })
+      showDebouncedToast(toast, { id: 'dispute-no-category', title: 'Error', description: 'Please select a dispute category', status: 'error', position: 'top-right' })
       return
     }
 
     if (description.trim().length < 20) {
-      toast({
+      showDebouncedToast(toast, {
+        id: 'dispute-short-description',
         title: 'Error',
         description: 'Description must be at least 20 characters',
         status: 'error',
+        position: 'top-right',
       })
       return
     }
 
     if (!photoFile && !evidenceImageUrl) {
-      toast({
+      showDebouncedToast(toast, {
+        id: 'dispute-no-evidence',
         title: 'Error',
         description: 'Please upload at least one photo as evidence',
         status: 'error',
+        position: 'top-right',
       })
       return
     }
@@ -132,11 +137,13 @@ const DisputeReportModal: React.FC<DisputeReportModalProps> = ({
 
       if (response.data?.success) {
         showNotification('Dispute filed successfully', 'success')
-        toast({
+        showDebouncedToast(toast, {
+          id: 'dispute-filed',
           title: 'Dispute Filed',
           description: `Your dispute has been filed. ${otherPartyName} has 48 hours to respond.`,
           status: 'success',
           duration: 5000,
+          position: 'top-right',
         })
 
         // Reset form
@@ -152,11 +159,13 @@ const DisputeReportModal: React.FC<DisputeReportModalProps> = ({
       }
     } catch (error: any) {
       const errorMessage = error?.response?.data?.error || error?.message || 'Failed to file dispute'
-      toast({
+      showDebouncedToast(toast, {
+        id: 'dispute-file-error',
         title: 'Error',
         description: errorMessage,
         status: 'error',
         duration: 5000,
+        position: 'top-right',
       })
     } finally {
       setIsSubmitting(false)

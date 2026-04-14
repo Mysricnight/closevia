@@ -32,6 +32,7 @@ import { FaMapMarkerAlt, FaTruck, FaExclamationTriangle, FaLocationArrow } from 
 import { api } from '../services/api'
 import { DeliveryRequest, DeliveryType, Product } from '../types'
 import { formatPHP } from '../utils/currency'
+import { showDebouncedToast } from '../utils/toastUtils'
 
 interface DeliveryRequestModalProps {
   isOpen: boolean
@@ -87,11 +88,12 @@ const DeliveryRequestModal: React.FC<DeliveryRequestModalProps> = ({
   // Get user location
   const getCurrentLocation = () => {
     if (!navigator.geolocation) {
-      toast({
-        id: "deliveryrequestmodal-location-not-supported",
+      showDebouncedToast(toast, {
+        id: "delivery-location-not-supported",
         title: 'Location not supported',
         description: 'Your browser does not support geolocation.',
         status: 'warning',
+        position: 'top-right',
       })
       return
     }
@@ -103,22 +105,24 @@ const DeliveryRequestModal: React.FC<DeliveryRequestModalProps> = ({
         setPickupLongitude(position.coords.longitude)
         setLocationPermission('granted')
         setIsGettingLocation(false)
-        toast({
-        id: "deliveryrequestmodal-location-detected",
+        showDebouncedToast(toast, {
+          id: "delivery-location-detected",
           title: 'Location detected',
           description: 'GPS coordinates have been captured.',
           status: 'success',
           duration: 2000,
+          position: 'top-right',
         })
       },
       (error) => {
         setIsGettingLocation(false)
         setLocationPermission('denied')
-        toast({
-        id: "deliveryrequestmodal-location-access-denied",
+        showDebouncedToast(toast, {
+          id: "delivery-location-access-denied",
           title: 'Location access denied',
           description: 'Please enter your address manually.',
           status: 'warning',
+          position: 'top-right',
         })
       },
       {
@@ -154,34 +158,37 @@ const DeliveryRequestModal: React.FC<DeliveryRequestModalProps> = ({
   const handleSubmit = async () => {
     // Validation
     if (!pickupAddress.trim() && !pickupLatitude) {
-      toast({
-        id: "deliveryrequestmodal-pickup-location-required",
+      showDebouncedToast(toast, {
+        id: "delivery-pickup-location-required",
         title: 'Pickup location required',
         description: 'Please provide a pickup address or allow location access.',
         status: 'warning',
+        position: 'top-right',
       })
       return
     }
 
     if (!deliveryAddress.trim()) {
-      toast({
-        id: "deliveryrequestmodal-delivery-address-required",
+      showDebouncedToast(toast, {
+        id: "delivery-address-required",
         title: 'Delivery address required',
         description: 'Please provide a delivery address.',
         status: 'warning',
+        position: 'top-right',
       })
       return
     }
 
     if (!isValidItemCount) {
-      toast({
-        id: "deliveryrequestmodal-invalid-item-count",
+      showDebouncedToast(toast, {
+        id: "delivery-invalid-item-count",
         title: 'Invalid item count',
         description:
           deliveryType === 'express'
             ? 'Express delivery allows only 1 item.'
             : 'Standard delivery allows maximum 5 items.',
         status: 'error',
+        position: 'top-right',
       })
       return
     }
@@ -205,11 +212,12 @@ const DeliveryRequestModal: React.FC<DeliveryRequestModalProps> = ({
       const response = await api.post('/api/deliveries', payload)
       const delivery = response.data?.data
 
-      toast({
-        id: "deliveryrequestmodal-delivery-request-created",
+      showDebouncedToast(toast, {
+        id: "delivery-request-created",
         title: 'Delivery request created',
         description: 'Your delivery has been added to the rider queue.',
         status: 'success',
+        position: 'top-right',
       })
 
       if (onSuccess && delivery?.id) {
@@ -218,11 +226,12 @@ const DeliveryRequestModal: React.FC<DeliveryRequestModalProps> = ({
 
       onClose()
     } catch (error: any) {
-      toast({
-        id: "deliveryrequestmodal-failed-to-create-delivery",
+      showDebouncedToast(toast, {
+        id: "delivery-create-failed",
         title: 'Failed to create delivery',
         description: error?.response?.data?.error || 'Please try again.',
         status: 'error',
+        position: 'top-right',
       })
     } finally {
       setIsSubmitting(false)

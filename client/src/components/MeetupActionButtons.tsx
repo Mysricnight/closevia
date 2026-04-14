@@ -16,6 +16,7 @@ import {
   useDisclosure,
 } from '@chakra-ui/react'
 import { api } from '../services/api'
+import { showDebouncedToast } from '../utils/toastUtils'
 
 export interface ActionData {
   label: string
@@ -97,11 +98,13 @@ const MeetupActionButtons: React.FC<MeetupActionButtonsProps> = ({
 
   const handleProposalSubmit = async () => {
     if (!timeModal.date || !timeModal.time) {
-      toast({
+      showDebouncedToast(toast, {
+        id: 'meetup-time-required',
         title: 'Required fields',
         description: 'Please provide both date and time',
         status: 'warning',
         duration: 2000,
+        position: 'top-right',
       })
       return
     }
@@ -114,22 +117,26 @@ const MeetupActionButtons: React.FC<MeetupActionButtonsProps> = ({
         proposed_time: proposedTime,
       })
 
-      toast({
+      showDebouncedToast(toast, {
+        id: 'meetup-time-proposed',
         title: 'Success',
         description: 'Meetup time proposed! Waiting for seller confirmation.',
         status: 'success',
         duration: 3000,
+        position: 'top-right',
       })
       onActionSuccess?.('propose_time', response.data)
       onTimeClose()
       setTimeModal({ date: '', time: '' })
     } catch (error: any) {
       const errorMsg = error.response?.data?.error || 'Failed to propose time'
-      toast({
+      showDebouncedToast(toast, {
+        id: 'meetup-time-error',
         title: 'Error',
         description: errorMsg,
         status: 'error',
         duration: 3000,
+        position: 'top-right',
       })
       onActionFail?.('propose_time', errorMsg)
     } finally {
@@ -139,11 +146,13 @@ const MeetupActionButtons: React.FC<MeetupActionButtonsProps> = ({
 
   const handleNoShowSubmit = async () => {
     if (!noShowModal.reason) {
-      toast({
+      showDebouncedToast(toast, {
+        id: 'meetup-noshow-reason-required',
         title: 'Required field',
         description: 'Please select a reason',
         status: 'warning',
         duration: 2000,
+        position: 'top-right',
       })
       return
     }
@@ -156,22 +165,26 @@ const MeetupActionButtons: React.FC<MeetupActionButtonsProps> = ({
         details: noShowModal.details,
       })
 
-      toast({
+      showDebouncedToast(toast, {
+        id: 'meetup-noshow-reported',
         title: 'Reported',
         description: 'No-show reported to support team. Investigation in progress.',
         status: 'info',
         duration: 3000,
+        position: 'top-right',
       })
       onActionSuccess?.('report_no_show', response.data)
       onNoShowClose()
       setNoShowModal({ reason: '', details: '' })
     } catch (error: any) {
       const errorMsg = error.response?.data?.error || 'Failed to report no-show'
-      toast({
+      showDebouncedToast(toast, {
+        id: 'meetup-noshow-error',
         title: 'Error',
         description: errorMsg,
         status: 'error',
         duration: 3000,
+        position: 'top-right',
       })
       onActionFail?.('report_no_show', errorMsg)
     } finally {
@@ -210,20 +223,24 @@ const MeetupActionButtons: React.FC<MeetupActionButtonsProps> = ({
         confirm_completion: '🎉 Trade completed successfully!',
       }
 
-      toast({
+      showDebouncedToast(toast, {
+        id: `meetup-${actionType}-success`,
         title: 'Success',
         description: successMessages[actionType] || 'Action completed',
         status: 'success',
         duration: 3000,
+        position: 'top-right',
       })
       onActionSuccess?.(actionType, response.data)
     } catch (error: any) {
       const errorMsg = error.response?.data?.error || 'Action failed'
-      toast({
+      showDebouncedToast(toast, {
+        id: `meetup-${actionType}-error`,
         title: 'Error',
         description: errorMsg,
         status: 'error',
         duration: 3000,
+        position: 'top-right',
       })
       onActionFail?.(actionType, errorMsg)
     } finally {

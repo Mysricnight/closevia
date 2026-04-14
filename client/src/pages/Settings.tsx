@@ -141,6 +141,7 @@ const SettingsPage: React.FC = () => {
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const [changingPassword, setChangingPassword] = useState(false)
   const [deleteConfirmText, setDeleteConfirmText] = useState('')
+  const [deletingAccount, setDeletingAccount] = useState(false)
 
 
   
@@ -816,7 +817,9 @@ const SettingsPage: React.FC = () => {
 
   // Handle account deletion
   const handleDeleteAccount = async () => {
+    if (deletingAccount) return // Prevent double-clicks
     try {
+      setDeletingAccount(true)
       await api.delete('/api/users/account')
       
       // Clear client-side storage
@@ -860,6 +863,8 @@ const SettingsPage: React.FC = () => {
         duration: 3000,
         isClosable: true,
       })
+    } finally {
+      setDeletingAccount(false)
     }
   }
 
@@ -1704,7 +1709,9 @@ const SettingsPage: React.FC = () => {
                 colorScheme="red"
                 onClick={handleDeleteAccount}
                 ml={3}
-                isDisabled={deleteConfirmText.trim() !== 'DELETE'}
+                isDisabled={deleteConfirmText.trim() !== 'DELETE' || deletingAccount}
+                isLoading={deletingAccount}
+                loadingText="Deleting..."
               >
                 Delete Account
               </Button>
