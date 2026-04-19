@@ -928,7 +928,7 @@ const SettingsPage: React.FC = () => {
 
     // Call context logout if available to clear auth state
     try {
-      logout && logout()
+      logout && await logout()
     } catch (e) {
       // ignore
     }
@@ -966,7 +966,7 @@ const SettingsPage: React.FC = () => {
 
       // Logout locally
       try {
-        logout && logout()
+        logout && await logout()
       } catch (e) {
         // ignore
       }

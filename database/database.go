@@ -489,6 +489,16 @@ func CreateTables() error {
 			FOREIGN KEY (trade_id) REFERENCES trades(id) ON DELETE CASCADE,
 			FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE
 		)`,
+		`CREATE TABLE IF NOT EXISTS trade_like_loops (
+			id INT AUTO_INCREMENT PRIMARY KEY,
+			loop_key VARCHAR(255) NOT NULL,
+			status ENUM('pending', 'confirmed', 'cancelled') DEFAULT 'pending',
+			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+			confirmed_at TIMESTAMP NULL,
+			UNIQUE KEY uniq_trade_like_loop_key (loop_key),
+			INDEX idx_trade_like_loops_status (status)
+		)`,
 		`CREATE TABLE IF NOT EXISTS trade_loop_messages (
 			id INT AUTO_INCREMENT PRIMARY KEY,
 			loop_id INT NOT NULL,
@@ -627,16 +637,6 @@ func CreateTables() error {
 			INDEX idx_trade_likes_liker (liker_id),
 			INDEX idx_trade_likes_liked_product (liked_product_id),
 			INDEX idx_trade_likes_offered_product (offered_product_id)
-		)`,
-		`CREATE TABLE IF NOT EXISTS trade_like_loops (
-			id INT AUTO_INCREMENT PRIMARY KEY,
-			loop_key VARCHAR(255) NOT NULL,
-			status ENUM('pending', 'confirmed', 'cancelled') DEFAULT 'pending',
-			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-			confirmed_at TIMESTAMP NULL,
-			UNIQUE KEY uniq_trade_like_loop_key (loop_key),
-			INDEX idx_trade_like_loops_status (status)
 		)`,
 		`CREATE TABLE IF NOT EXISTS trade_like_loop_participants (
 			id INT AUTO_INCREMENT PRIMARY KEY,

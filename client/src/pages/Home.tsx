@@ -567,8 +567,8 @@ const Home: React.FC = () => {
     setHasSearched(false)
   }, [])
 
-  const handleLogout = useCallback(() => {
-    logout()
+  const handleLogout = useCallback(async () => {
+    await logout()
     onCloseLogoutModal()
     navigate('/login')
   }, [logout, onCloseLogoutModal, navigate])

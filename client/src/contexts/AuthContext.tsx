@@ -9,7 +9,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>
   googleLogin: (firebaseToken: string, userData: any) => Promise<void>
   register: (payload: { name: string; email: string; phone?: string; password: string; is_organization?: boolean; org_name?: string; department?: string; org_logo_url?: string; bio?: string; organization_type?: string }) => Promise<{ requiresVerification: boolean; email: string; token?: string }>
-  logout: () => void
+  logout: () => Promise<void>
   updateProfile: (payload: { name?: string; email?: string; profile_picture?: string; phone?: string; phone_verified?: boolean }) => Promise<void>
   refreshUser: () => Promise<void>
   restoreAuthentication: () => Promise<void>
@@ -368,11 +368,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }
 
-  const logout = () => {
+  const logout = async () => {
     console.log('AuthContext: Logging out user')
+    // Clear auth header
     delete api.defaults.headers.common['Authorization']
+    // Clear token first
     setToken(null)
+    // Clear user state
     setUser(null)
+    // Clear any other auth-related localStorage items
+    localStorage.removeItem('skip_auth')
+    // Wait a tick to ensure state updates propagate
+    await new Promise(resolve => setTimeout(resolve, 0))
   }
 
   const value: AuthContextType = {

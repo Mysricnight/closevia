@@ -176,9 +176,9 @@ const Sidebar: React.FC = () => {
       )
       return items
     }
+    // Only show home button when not logged in
     return [
       { icon: FaHome, label: 'Home', path: '/home' },
-      { icon: FiUser, label: 'Login', path: '/login' },
     ]
   }, [user, riderStatus])
 
