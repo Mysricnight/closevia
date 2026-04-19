@@ -1378,7 +1378,7 @@ const Home: React.FC = () => {
                     py={{ base: 2, md: 3 }}
                     rounded="full"
                     bg={isSelected ? (category.value === 'All' ? 'brand.600' : category.color) : 'white'}
-                    color={isSelected ? 'white' : 'gray.700'}
+                    color={isSelected ? '#000000' : 'gray.700'}
                     fontWeight={isSelected ? '600' : '500'}
                     fontSize={{ base: 'xs', md: 'sm' }}
                     border="2px solid"
@@ -1387,6 +1387,7 @@ const Home: React.FC = () => {
                     transition="all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)"
                     position="relative"
                     overflow="hidden"
+                    textShadow={isSelected ? '0 1px 2px rgba(0, 0, 0, 0.2)' : 'none'}
                     _before={{
                       content: '""',
                       position: 'absolute',
@@ -1418,6 +1419,8 @@ const Home: React.FC = () => {
                       as="span"
                       transition="all 0.2s ease"
                       display={{ base: category.value === 'All' ? 'inline' : 'none', md: 'inline' }}
+                      color="inherit"
+                      fontWeight="inherit"
                     >
                       {category.label}
                     </Text>
