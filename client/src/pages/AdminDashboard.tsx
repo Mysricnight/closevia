@@ -1386,7 +1386,7 @@ const AdminDashboard: React.FC = () => {
     try {
       setUsersLoading(true);
       const endpoint = isSuspended ? `/api/admin/users/${user.id}/unsuspend` : `/api/admin/users/${user.id}/suspend`;
-      await api.put(endpoint);
+      await api.post(endpoint);
       toast({
         title: `User ${isSuspended ? 'unsuspended' : 'suspended'}`,
         status: 'success',
@@ -1414,7 +1414,7 @@ const AdminDashboard: React.FC = () => {
     try {
       setUsersLoading(true);
       const endpoint = isBanned ? `/api/admin/users/${user.id}/unban` : `/api/admin/users/${user.id}/ban`;
-      await api.put(endpoint);
+      await api.post(endpoint);
       toast({
         title: `User ${isBanned ? 'unbanned' : 'banned'}`,
         status: 'success',

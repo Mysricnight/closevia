@@ -675,7 +675,7 @@ func (h *UserHandler) Login(c *fiber.Ctx) error {
 
 	// Use context with timeout to prevent hanging queries (requires index on email)
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-		err := h.db.QueryRowContext(ctx, `
+	err := h.db.QueryRowContext(ctx, `
 		SELECT id, COALESCE(slug, ''), name, email, password_hash, role, verified, 
 		       COALESCE(is_premium, FALSE), COALESCE(premium_tier, 'free'), premium_expires_at,
 		       COALESCE(strikes, 0), COALESCE(is_suspended, FALSE)
@@ -698,11 +698,26 @@ func (h *UserHandler) Login(c *fiber.Ctx) error {
 	// 	})
 	// }
 
-	// Check for strikes suspension ladder
+	// Check for strikes suspension ladder or admin suspension/ban
 	if user.IsSuspended || user.Strikes >= 3 {
 		return c.Status(403).JSON(models.APIResponse{
 			Success: false,
 			Error:   "Your account has been auto-suspended pending admin review due to multiple strikes or policy violations.",
+		})
+	}
+
+	// Check if user is suspended or banned by admin
+	if user.Role == "suspended" {
+		return c.Status(403).JSON(models.APIResponse{
+			Success: false,
+			Error:   "Your account has been suspended. Please contact support for more information.",
+		})
+	}
+
+	if user.Role == "banned" {
+		return c.Status(403).JSON(models.APIResponse{
+			Success: false,
+			Error:   "Your account has been banned and is no longer accessible.",
 		})
 	}
 
@@ -858,6 +873,21 @@ func (h *UserHandler) GoogleLogin(c *fiber.Ctx) error {
 		return c.Status(403).JSON(models.APIResponse{
 			Success: false,
 			Error:   "Your account has been auto-suspended pending admin review due to multiple strikes or policy violations.",
+		})
+	}
+
+	// Check if user is suspended or banned by admin
+	if user.Role == "suspended" {
+		return c.Status(403).JSON(models.APIResponse{
+			Success: false,
+			Error:   "Your account has been suspended. Please contact support for more information.",
+		})
+	}
+
+	if user.Role == "banned" {
+		return c.Status(403).JSON(models.APIResponse{
+			Success: false,
+			Error:   "Your account has been banned and is no longer accessible.",
 		})
 	}
 
@@ -1995,6 +2025,7 @@ func (h *UserHandler) DeleteUser(c *fiber.Ctx) error {
 	return c.JSON(models.APIResponse{
 		Success: true,
 		Message: "User deleted successfully",
+		Data:    fiber.Map{"id": userID},
 	})
 }
 
@@ -2595,6 +2626,7 @@ func (h *UserHandler) SuspendUser(c *fiber.Ctx) error {
 	return c.JSON(models.APIResponse{
 		Success: true,
 		Message: "User has been suspended successfully",
+		Data:    fiber.Map{"id": userID, "role": "suspended"},
 	})
 }
 
@@ -2621,6 +2653,7 @@ func (h *UserHandler) UnsuspendUser(c *fiber.Ctx) error {
 	return c.JSON(models.APIResponse{
 		Success: true,
 		Message: "User has been unsuspended successfully",
+		Data:    fiber.Map{"id": userID, "role": "user"},
 	})
 }
 
@@ -2655,6 +2688,7 @@ func (h *UserHandler) BanUser(c *fiber.Ctx) error {
 	return c.JSON(models.APIResponse{
 		Success: true,
 		Message: "User has been banned successfully",
+		Data:    fiber.Map{"id": userID, "role": "banned"},
 	})
 }
 
@@ -2681,6 +2715,7 @@ func (h *UserHandler) UnbanUser(c *fiber.Ctx) error {
 	return c.JSON(models.APIResponse{
 		Success: true,
 		Message: "User has been unbanned successfully",
+		Data:    fiber.Map{"id": userID, "role": "user"},
 	})
 }
 

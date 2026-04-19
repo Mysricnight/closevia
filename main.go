@@ -662,10 +662,10 @@ func main() {
 	admin.Get("/revenue", middleware.AuthMiddleware(), middleware.AdminMiddleware(), adminHandler.GetAdminRevenue)
 	// Admin user management
 	admin.Get("/users", middleware.AuthMiddleware(), middleware.AdminMiddleware(), userHandler.GetUsers)
-	admin.Put("/users/:id/suspend", middleware.AuthMiddleware(), middleware.AdminMiddleware(), userHandler.SuspendUser)
-	admin.Put("/users/:id/unsuspend", middleware.AuthMiddleware(), middleware.AdminMiddleware(), userHandler.UnsuspendUser)
-	admin.Put("/users/:id/ban", middleware.AuthMiddleware(), middleware.AdminMiddleware(), userHandler.BanUser)
-	admin.Put("/users/:id/unban", middleware.AuthMiddleware(), middleware.AdminMiddleware(), userHandler.UnbanUser)
+	admin.Post("/users/:id/suspend", middleware.AuthMiddleware(), middleware.AdminMiddleware(), userHandler.SuspendUser)
+	admin.Post("/users/:id/unsuspend", middleware.AuthMiddleware(), middleware.AdminMiddleware(), userHandler.UnsuspendUser)
+	admin.Post("/users/:id/ban", middleware.AuthMiddleware(), middleware.AdminMiddleware(), userHandler.BanUser)
+	admin.Post("/users/:id/unban", middleware.AuthMiddleware(), middleware.AdminMiddleware(), userHandler.UnbanUser)
 	admin.Delete("/users/:id", middleware.AuthMiddleware(), middleware.AdminMiddleware(), userHandler.DeleteUser)
 	// Admin: school ID verification review
 	admin.Get("/verifications", middleware.AuthMiddleware(), middleware.AdminMiddleware(), verificationHandler.AdminListVerifications)

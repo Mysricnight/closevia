@@ -102,7 +102,7 @@ type User struct {
 	Phone                       string     `json:"phone,omitempty"`
 	PhoneVerified               bool       `json:"phone_verified,omitempty"`
 	PasswordHash                string     `json:"-" validate:"required"`
-	Role                        string     `json:"role" validate:"oneof=user admin"`
+	Role                        string     `json:"role" validate:"oneof=user admin suspended banned"`
 	Verified                    bool       `json:"verified"`
 	IsOrganization              bool       `json:"is_organization"`
 	OrgVerified                 bool       `json:"org_verified"`
